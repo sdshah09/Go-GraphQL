@@ -4,7 +4,7 @@ import (
 	"log"
 	"my-graphql-server/config"
 	"my-graphql-server/graph"
-	"my-graphql-server/utils"
+	"my-graphql-server/utils/postgres"
 	"net/http"
 	"os"
 
