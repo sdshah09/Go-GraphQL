@@ -13,6 +13,8 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
+	MONGOURI   string
+	MONGODB    string
 }
 
 func LoadConfig() (*Config, error) {
@@ -26,6 +28,8 @@ func LoadConfig() (*Config, error) {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
+		MONGOURI:   os.Getenv("MONGO_URI"),
+		MONGODB:    os.Getenv("MONGO_DB"),
 	}
 	return config, nil
 }

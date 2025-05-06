@@ -4,6 +4,7 @@ import (
 	"log"
 	"my-graphql-server/config"
 	"my-graphql-server/graph"
+	"my-graphql-server/utils/mongodb"
 	"my-graphql-server/utils/postgres"
 	"net/http"
 	"os"
@@ -24,23 +25,31 @@ func main() {
 		port = defaultPort
 	}
 
-	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal("Error loading config:", err)
 	}
 
-	// Initialize database connection
-	db, err := utils.ConnectDB(cfg)
+	pg, err := postgres.ConnectDB(cfg)
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
 	}
-	defer db.Close()
+	defer pg.Close()
 
-	// Create resolver with database connection
+	mongoClient := mongodb.ConnectMongo(cfg.MONGOURI)
+
 	resolver := &graph.Resolver{
-		DB: db,
+		Postgres: pg,
+		Mongo:    mongoClient,
 	}
+
+	// if err := postgres.CreatePatientsTable(pg); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// if err := mongodb.CreatePatientsCollection(mongoClient.Database(cfg.MONGODB)); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 

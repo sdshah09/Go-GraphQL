@@ -1,78 +1,135 @@
-# GraphQL Server
+# GraphQL Server with PostgreSQL and MongoDB
 
-A modern GraphQL server built with Go using the gqlgen framework.
+A GraphQL server that supports both PostgreSQL and MongoDB databases, built with Go and gqlgen.
 
 ## Features
 
-- GraphQL API with playground interface
-- Query caching with LRU cache
-- Automatic persisted queries
-- Docker support
-- Built with gqlgen for type-safe GraphQL implementation
+- Dual database support (PostgreSQL and MongoDB)
+- GraphQL API with playground
+- CRUD operations for Patients
+- Database schema validation
+- Environment-based configuration
 
 ## Prerequisites
 
-- Go 1.24.2 or later
-- Docker (optional, for containerized deployment)
+- Go 1.16 or higher
+- PostgreSQL
+- MongoDB
+- Make (optional, for using Makefile commands)
 
-## Getting Started
-
-### Local Development
+## Setup
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/sdshah09/Go-GraphQL.git
-   cd Go-GraphQL
-   ```
+```bash
+git clone https://github.com/sdshah09/Go-GraphQL
+cd my-graphql-server
+```
 
 2. Install dependencies:
-   ```bash
-   go mod download
-   ```
+```bash
+go mod download
+```
 
-3. Run the server:
-   ```bash
-   go run server.go
-   ```
+3. Create a `.env` file in the root directory:
+```env
+# PostgreSQL Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_NAME=your_db_name
 
-4. Access the GraphQL playground:
-   Open your browser and navigate to `http://localhost:8080`
+# MongoDB Configuration
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=your_db_name
+```
 
-### Docker Deployment
+4. Run the server:
+```bash
+go run server.go
+```
 
-1. Build the Docker image:
-   ```bash
-   docker build -t my-graphql-server .
-   ```
+The GraphQL playground will be available at `http://localhost:8080`
 
-2. Run the container:
-   ```bash
-   docker run -p 8080:8080 my-graphql-server
-   ```
+## API Examples
 
-## API Documentation
+### Create a Patient
 
-The GraphQL playground is available at `http://localhost:8080` when the server is running. This interactive interface allows you to:
+```graphql
+mutation {
+  createPatient(
+    input: {
+      first_name: "John"
+      last_name: "Doe"
+      db: "postgres"  # or "mongo"
+    }
+  ) {
+    id
+    first_name
+    last_name
+  }
+}
+```
 
-- Explore the GraphQL schema
-- Test queries and mutations
-- View API documentation
+### Query Patients
+
+```graphql
+query {
+  patients(db: "postgres") {  # or "mongo"
+    id
+    first_name
+    last_name
+  }
+}
+```
+
+## Database Schemas
+
+### PostgreSQL
+```sql
+CREATE TABLE patients (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255)
+);
+```
+
+### MongoDB
+```javascript
+{
+  $jsonSchema: {
+    bsonType: "object",
+    required: ["first_name"],
+    properties: {
+      first_name: {
+        bsonType: "string",
+        description: "must be a string and is required"
+      },
+      last_name: {
+        bsonType: "string",
+        description: "must be a string if present"
+      }
+    }
+  }
+}
+```
 
 ## Project Structure
 
 ```
 .
-├── Dockerfile          # Docker configuration
-├── graph/             # GraphQL schema and resolvers
-├── gqlgen.yml         # gqlgen configuration
-├── go.mod             # Go module dependencies
-├── go.sum             # Go module checksums
-├── server.go          # Main server implementation
-└── tools.go           # Go tools configuration
+├── config/         # Configuration management
+├── graph/          # GraphQL schema and resolvers
+├── utils/          # Database utilities
+│   ├── postgres/   # PostgreSQL specific code
+│   └── mongodb/    # MongoDB specific code
+├── server.go       # Main server file
+└── .env           # Environment variables
 ```
 
-## Dependencies
+## Development
 
-- [gqlgen](https://github.com/99designs/gqlgen) - Go GraphQL implementation
-- [gqlparser](https://github.com/vektah/gqlparser) - GraphQL parser
-
+To regenerate GraphQL code after schema changes:
+```bash
+go run github.com/99designs/gqlgen generate
+```

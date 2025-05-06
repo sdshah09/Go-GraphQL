@@ -1,4 +1,4 @@
-package utils
+package postgres
 
 import (
 	"database/sql"
@@ -32,4 +32,19 @@ func ConnectDB(cfg *config.Config) (*sql.DB, error) {
 
 	log.Println("Successfully connected to database!")
 	return db, nil
+}
+
+func CreatePatientsTable(db *sql.DB) error {
+	query := `
+	CREATE TABLE IF NOT EXISTS patients (
+		id SERIAL PRIMARY KEY,
+		first_name VARCHAR(255) NOT NULL,
+		last_name VARCHAR(255)
+	);`
+
+	_, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to create patients table: %w", err)
+	}
+	return nil
 }

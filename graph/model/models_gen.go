@@ -42,6 +42,7 @@ type QueryInput struct {
 type QueryPatientInput struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+	Db        string `json:"db"`
 }
 
 type Todo struct {

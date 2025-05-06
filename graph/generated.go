@@ -69,7 +69,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Cars     func(childComplexity int) int
-		Patients func(childComplexity int) int
+		Patients func(childComplexity int, db string) int
 		Todos    func(childComplexity int) int
 		User     func(childComplexity int) int
 	}
@@ -103,7 +103,7 @@ type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
 	User(ctx context.Context) ([]*model.UserEducation, error)
 	Cars(ctx context.Context) ([]*model.Cars, error)
-	Patients(ctx context.Context) ([]*model.Patient, error)
+	Patients(ctx context.Context, db string) ([]*model.Patient, error)
 }
 
 type executableSchema struct {
@@ -234,7 +234,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Query.Patients(childComplexity), true
+		args, err := ec.field_Query_patients_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Patients(childComplexity, args["db"].(string)), true
 
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
@@ -549,6 +554,29 @@ func (ec *executionContext) field_Query___type_argsName(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_patients_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_patients_argsDb(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["db"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_patients_argsDb(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("db"))
+	if tmp, ok := rawArgs["db"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1394,7 +1422,7 @@ func (ec *executionContext) _Query_patients(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Patients(rctx)
+		return ec.resolvers.Query().Patients(rctx, fc.Args["db"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1411,7 +1439,7 @@ func (ec *executionContext) _Query_patients(ctx context.Context, field graphql.C
 	return ec.marshalNPatient2ᚕᚖmyᚑgraphqlᚑserverᚋgraphᚋmodelᚐPatientᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_patients(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_patients(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1428,6 +1456,17 @@ func (ec *executionContext) fieldContext_Query_patients(_ context.Context, field
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Patient", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_patients_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4046,7 +4085,7 @@ func (ec *executionContext) unmarshalInputQueryPatientInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"first_name", "last_name"}
+	fieldsInOrder := [...]string{"first_name", "last_name", "db"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4067,6 +4106,13 @@ func (ec *executionContext) unmarshalInputQueryPatientInput(ctx context.Context,
 				return it, err
 			}
 			it.LastName = data
+		case "db":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("db"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Db = data
 		}
 	}
 
@@ -4880,6 +4926,7 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4953,6 +5000,7 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (str
 }
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5046,6 +5094,7 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5235,6 +5284,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5423,6 +5473,7 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v a
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5438,6 +5489,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -5454,6 +5507,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
 }
@@ -5470,6 +5525,8 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
 }

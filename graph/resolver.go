@@ -1,7 +1,12 @@
 package graph
 
-import "my-graphql-server/graph/model"
-import "database/sql"
+import (
+	"database/sql"
+	"my-graphql-server/graph/model"
+
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
@@ -10,5 +15,6 @@ type Resolver struct{
 	TodoList []*model.Todo
 	UserList []*model.UserEducation
 	CarsList     []*model.Cars
-	DB *sql.DB
+	Postgres *sql.DB
+	Mongo *mongo.Client
 }

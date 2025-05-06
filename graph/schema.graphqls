@@ -18,7 +18,7 @@ type Query {
   todos: [Todo!]!
   user: [UserEducation!]!
   cars: [Cars!]!
-  patients: [Patient!]!
+  patients(db: String!): [Patient!]!
 }
 
 input NewTodo {
@@ -63,6 +63,7 @@ type Cars{
 input QueryPatientInput {
   first_name: String!,
   last_name: String!
+  db: String!
 }
 
 type Patient {
