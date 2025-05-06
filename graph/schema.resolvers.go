@@ -53,6 +53,25 @@ func (r *mutationResolver) CreateCar(ctx context.Context, input model.QueryCarDe
 	return car, nil
 }
 
+// CreatePatient is the resolver for the createPatient field.
+func (r *mutationResolver) CreatePatient(ctx context.Context, input model.QueryPatientInput) (*model.Patient, error) {
+	var id int
+	err := r.Resolver.DB.QueryRow(
+		"INSERT INTO patients (first_name, last_name) VALUES ($1, $2) RETURNING id",
+		input.FirstName, input.LastName,
+	).Scan(&id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Patient{
+		ID:        strconv.Itoa(id),
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+	}, nil
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	// panic(fmt.Errorf("not implemented: Todos - todos"))
@@ -70,6 +89,27 @@ func (r *queryResolver) User(ctx context.Context) ([]*model.UserEducation, error
 func (r *queryResolver) Cars(ctx context.Context) ([]*model.Cars, error) {
 	// panic(fmt.Errorf("not implemented: Cars - cars"))
 	return r.CarsList, nil
+}
+
+// Patients is the resolver for the patients field.
+func (r *queryResolver) Patients(ctx context.Context) ([]*model.Patient, error) {
+	// panic(fmt.Errorf("not implemented: Patients - patients"))
+	rows, err := r.Resolver.DB.Query("SELECT id, first_name, last_name FROM patients")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var patients []*model.Patient
+	for rows.Next() {
+		var p model.Patient
+		err := rows.Scan(&p.ID, &p.FirstName, &p.LastName)
+		if err != nil {
+			return nil, err
+		}
+		patients = append(patients, &p)
+	}
+	return patients, nil
 }
 
 // Mutation returns MutationResolver implementation.

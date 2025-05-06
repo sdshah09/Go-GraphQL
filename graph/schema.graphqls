@@ -18,6 +18,7 @@ type Query {
   todos: [Todo!]!
   user: [UserEducation!]!
   cars: [Cars!]!
+  patients: [Patient!]!
 }
 
 input NewTodo {
@@ -29,6 +30,7 @@ type Mutation {
   createTodo(input: NewTodo!): Todo!
   createUser(input: QueryInput!): UserEducation!
   createCar(input: QueryCarDetails!): Cars!
+  createPatient(input: QueryPatientInput!): Patient!
 }
   
 input QueryInput {
@@ -55,4 +57,16 @@ type Cars{
   model: String!
   price: String!
   mfdYear: String!
+}
+
+
+input QueryPatientInput {
+  first_name: String!,
+  last_name: String!
+}
+
+type Patient {
+  id: ID!
+  first_name: String!
+  last_name: String!
 }

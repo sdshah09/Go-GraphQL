@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"my-graphql-server/config"
 	"my-graphql-server/graph"
+	"my-graphql-server/utils"
 	"net/http"
 	"os"
 
@@ -22,7 +24,25 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	// Load configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal("Error loading config:", err)
+	}
+
+	// Initialize database connection
+	db, err := utils.ConnectDB(cfg)
+	if err != nil {
+		log.Fatal("Error connecting to database:", err)
+	}
+	defer db.Close()
+
+	// Create resolver with database connection
+	resolver := &graph.Resolver{
+		DB: db,
+	}
+
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

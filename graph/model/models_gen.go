@@ -17,6 +17,12 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
+type Patient struct {
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 type Query struct {
 }
 
@@ -31,6 +37,11 @@ type QueryInput struct {
 	Name       string `json:"name"`
 	School     string `json:"school"`
 	Graduation string `json:"graduation"`
+}
+
+type QueryPatientInput struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type Todo struct {
