@@ -14,11 +14,21 @@ func ConnectMongo(uri string) *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		panic(err)
+	clientOpts := options.Client().ApplyURI(uri)
+	var client *mongo.Client
+	var err error
+
+	for i := 0; i < 5; i++ {
+		client, err = mongo.Connect(ctx, clientOpts)
+		if err == nil && client.Ping(ctx, nil) == nil {
+			fmt.Println("Successfully connected to MongoDB!")
+			return client
+		}
+		fmt.Printf("Retrying MongoDB connection... (%d/5)\n", i+1)
+		time.Sleep(3 * time.Second)
 	}
-	return client
+
+	panic(fmt.Errorf("failed to connect to MongoDB: %w", err))
 }
 
 func CreatePatientsCollection(db *mongo.Database) error {
