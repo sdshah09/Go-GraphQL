@@ -4,7 +4,7 @@ import (
 	"log"
 	"my-graphql-server/config"
 	"my-graphql-server/graph"
-	"my-graphql-server/utils/mongodb"
+	// "my-graphql-server/utils/mongodb"
 	"my-graphql-server/utils/postgres"
 	"net/http"
 	"os"
@@ -36,20 +36,20 @@ func main() {
 	}
 	defer pg.Close()
 
-	mongoClient := mongodb.ConnectMongo(cfg.MONGOURI)
+	// mongoClient := mongodb.ConnectMongo(cfg.MONGOURI)
 
 	resolver := &graph.Resolver{
 		Postgres: pg,
-		Mongo:    mongoClient,
+		// Mongo:    mongoClient,
 	}
 
 	if err := postgres.CreatePatientsTable(pg); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := mongodb.CreatePatientsCollection(mongoClient.Database(cfg.MONGODB)); err != nil {
-		log.Fatal(err)
-	}
+	// if err := mongodb.CreatePatientsCollection(mongoClient.Database(cfg.MONGODB)); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 

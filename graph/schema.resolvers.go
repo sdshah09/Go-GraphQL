@@ -101,7 +101,7 @@ func (r *mutationResolver) CreatePatient(ctx context.Context, input model.QueryP
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	// panic(fmt.Errorf("not implemented: Todos - todos"))
-	fmt.Print("Hi")
+	fmt.Println("Hi")
 	return r.TodoList, nil
 }
 
@@ -122,6 +122,7 @@ func (r *queryResolver) Patients(ctx context.Context, db string) ([]*model.Patie
 	// panic(fmt.Errorf("not implemented: Patients - patients"))
 	switch db {
 	case "postgres":
+		fmt.Println("How are you Postgres?")
 		rows, err := r.Resolver.Postgres.Query("SELECT id, first_name, last_name FROM patients")
 		if err != nil {
 			return nil, err
